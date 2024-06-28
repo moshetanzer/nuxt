@@ -287,7 +287,7 @@ export default defineRenderHandler(async (event): Promise<Partial<RenderResponse
   const routeOptions = getRouteRules(event)
 
   const head = createServerHead({
-    plugins: unheadPlugins,
+    plugins: !isRenderingIsland ? unheadPlugins : undefined,
   })
   // needed for hash hydration plugin to work
   const headEntryOptions: HeadEntryOptions = { mode: 'server' }
