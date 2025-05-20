@@ -303,18 +303,32 @@ export function getRouteMeta (contents: string, absolutePath: string, extraExtra
 const COLON_RE = /:/g
 function getRoutePath (tokens: SegmentToken[], hasSucceedingSegment = false): string {
   return tokens.reduce((path, token) => {
-    return (
-      path +
-      (token.type === SegmentTokenType.optional
-        ? `:${token.value}?`
-        : token.type === SegmentTokenType.dynamic
-          ? `:${token.value}()`
-          : token.type === SegmentTokenType.catchall
-            ? hasSucceedingSegment ? `:${token.value}([^/]*)*` : `:${token.value}(.*)*`
-            : token.type === SegmentTokenType.group
-              ? ''
-              : encodePath(token.value).replace(COLON_RE, '\\:'))
-    )
+    let segment = ''
+
+    switch (token.type) {
+      case SegmentTokenType.optional:
+        segment = `:${token.value}?`
+        break
+
+      case SegmentTokenType.dynamic:
+        segment = `:${token.value}()`
+        break
+
+      case SegmentTokenType.catchall:
+        segment = hasSucceedingSegment
+          ? `:${token.value}([^/]*)*`
+          : `:${token.value}(.*)*`
+        break
+
+      case SegmentTokenType.group:
+        // segment empty for group type
+        break
+
+      default:
+        segment = encodePath(token.value).replace(COLON_RE, '\\:')
+    }
+
+    return path + segment
   }, '/')
 }
 
